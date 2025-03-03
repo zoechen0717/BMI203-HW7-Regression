@@ -86,3 +86,4 @@ def test_sklearn_comparison():
     model.train_model(X_train, y_train, X_test, y_test)
     our_pred = model.make_prediction(X_test)
     assert np.allclose(sklearn_pred, our_pred, atol=1e-4), "Our predictions do not match."
+    

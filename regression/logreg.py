@@ -129,8 +129,6 @@ class LogisticRegressor(BaseRegressor):
         Returns:
             The predicted labels (y_pred) for given X.
         """
-        # add a column of ones to X for the bias term
-        X = np.hstack([X, np.ones((X.shape[0], 1))])
         # get the lr output result first by dot product of X and W
         lr_output = np.dot(X, self.W)
         # transform to a S-shaped curve using the logistic function

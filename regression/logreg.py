@@ -20,22 +20,22 @@ class BaseRegressor():
         # Define empty lists to store losses over training
         self.loss_hist_train = []
         self.loss_hist_val = []
-    
+
     def make_prediction(self, X):
         raise NotImplementedError
-    
+
     def loss_function(self, y_true, y_pred):
         raise NotImplementedError
-        
+
     def calculate_gradient(self, y_true, X):
         raise NotImplementedError
-    
+
     def train_model(self, X_train, y_train, X_val, y_val):
 
         # Padding data with vector of ones for bias term
         X_train = np.hstack([X_train, np.ones((X_train.shape[0], 1))])
         X_val = np.hstack([X_val, np.ones((X_val.shape[0], 1))])
-    
+
         # Defining intitial values for while loop
         prev_update_size = 1
         iteration = 1
@@ -68,7 +68,7 @@ class BaseRegressor():
                 # Update weights
                 prev_W = self.W
                 grad = self.calculate_gradient(y_train, X_train)
-                new_W = prev_W - self.lr * grad 
+                new_W = prev_W - self.lr * grad
                 self.W = new_W
 
                 # Save parameter update size
@@ -83,7 +83,7 @@ class BaseRegressor():
 
             # Update iteration
             iteration += 1
-    
+
     def plot_loss_history(self):
 
         # Make sure training has been run
@@ -104,7 +104,7 @@ class BaseRegressor():
         self.W = np.random.randn(self.num_feats + 1).flatten()
         self.loss_hist_train = []
         self.loss_hist_val = []
-        
+
 # Implement logistic regression as a subclass
 class LogisticRegressor(BaseRegressor):
 
@@ -116,21 +116,25 @@ class LogisticRegressor(BaseRegressor):
             max_iter=max_iter,
             batch_size=batch_size
         )
-    
+
     def make_prediction(self, X) -> np.array:
         """
         TODO: Implement logistic function to get estimates (y_pred) for input X values. The logistic
         function is a transformation of the linear model into an "S-shaped" curve that can be used
         for binary classification.
 
-        Arguments: 
+        Arguments:
             X (np.ndarray): Matrix of feature values.
 
-        Returns: 
+        Returns:
             The predicted labels (y_pred) for given X.
         """
-        pass
-    
+        # get the lr output result first
+        lr_output = np.dot(X, self.W)
+        # transform to a S-shaped cureve
+        y_pred = 1 / (1 + np.exp(-lr_output))
+        return y_pred
+
     def loss_function(self, y_true, y_pred) -> float:
         """
         TODO: Implement binary cross entropy loss, which assumes that the true labels are either
@@ -140,11 +144,13 @@ class LogisticRegressor(BaseRegressor):
             y_true (np.array): True labels.
             y_pred (np.array): Predicted labels.
 
-        Returns: 
+        Returns:
             The mean loss (a single number).
         """
-        pass
-        
+        # calculate the mean loss
+        mean_loss = -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
+        return mean_loss
+
     def calculate_gradient(self, y_true, X) -> np.ndarray:
         """
         TODO: Calculate the gradient of the loss function with respect to the given data. This
@@ -154,7 +160,10 @@ class LogisticRegressor(BaseRegressor):
             y_true (np.array): True labels.
             X (np.ndarray): Matrix of feature values.
 
-        Returns: 
+        Returns:
             Vector of gradients.
         """
-        pass
+        # calculate the gradient
+        y_pred = self.make_prediction(X)
+        gradient = np.dot(X.T, (y_pred - y_true)) / X.shape[0]
+        return gradient

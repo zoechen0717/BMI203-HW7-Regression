@@ -1,4 +1,5 @@
 # HW 7: logistic regression
+![Build Status](https://github.com/zoechen0717/BMI203-HW7-Regression/actions/workflows/test.yml/badge.svg)
 
 In this assignment, you'll implement a classifier using logistic regression, optimized with gradient descent.
 

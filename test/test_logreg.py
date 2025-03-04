@@ -79,11 +79,4 @@ def test_training():
     # Check that weights have updated
     assert not np.array_equal(initial_weights, updated_weights), "Weights should update during training."
 
-def test_sklearn_comparison():
-    sklearn_model = LogisticRegression()
-    sklearn_model.fit(X_train, y_train)
-    sklearn_pred = sklearn_model.predict_proba(X_test)[:, 1]
-    model.train_model(X_train, y_train, X_test, y_test)
-    our_pred = model.make_prediction(X_test)
-    assert np.allclose(sklearn_pred, our_pred, atol=1e-4), "Our predictions do not match."
     

@@ -34,7 +34,7 @@ X_train, X_test, y_train, y_test = loadDataset(features, split_percent=0.8)
 
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
-X_val = sc.transform(X_val)
+X_val = sc.transform(X_test)
 # Initialize model
 model = LogisticRegressor(num_feats=6, learning_rate=0.01, tol=0.00001, max_iter=5000, batch_size=32)
 

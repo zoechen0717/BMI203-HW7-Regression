@@ -129,9 +129,12 @@ class LogisticRegressor(BaseRegressor):
         Returns:
             The predicted labels (y_pred) for given X.
         """
-        # get the lr output result first by dot product of X and W
+        # Add bias term if missing
+        if X.shape[1] == self.num_feats:
+            X = np.hstack([X, np.ones((X.shape[0], 1))])
+        # get the lr output result first
         lr_output = np.dot(X, self.W)
-        # transform to a S-shaped curve using the logistic function
+        # transform to a S-shaped curve
         y_pred = 1 / (1 + np.exp(-lr_output))
         return y_pred
 
@@ -147,6 +150,9 @@ class LogisticRegressor(BaseRegressor):
         Returns:
             The mean loss (a single number).
         """
+        # clip the y_pred to avoid log(0) and log(1)    
+        epsilon = 1e-10
+        y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
         # calculate the mean loss
         mean_loss = -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
         return mean_loss
@@ -163,6 +169,9 @@ class LogisticRegressor(BaseRegressor):
         Returns:
             Vector of gradients.
         """
+        # Add bias term if missing
+        if X.shape[1] == self.num_feats:
+            X = np.hstack([X, np.ones((X.shape[0], 1))])
         # calculate the gradient
         y_pred = self.make_prediction(X)
         gradient = np.dot(X.T, (y_pred - y_true)) / X.shape[0]

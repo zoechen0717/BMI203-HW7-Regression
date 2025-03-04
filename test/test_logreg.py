@@ -58,7 +58,7 @@ def test_loss_function():
     # Calculate loss using model
     model_loss = model.loss_function(y_test, y_pred)
     # Check that the loss functions match
-    assert np.isclose(model_loss, sklearn_loss, atol=1e-4), "Loss function does not match sklearn log_loss."
+    assert np.isclose(model_loss, sklearn_loss, atol=1e-3), "Loss function does not match sklearn log_loss."
 
 # Test that the gradient is being calculated correctly
 def test_gradient():

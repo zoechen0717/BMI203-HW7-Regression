@@ -15,6 +15,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
+from sklearn.preprocessing import StandardScaler
 from regression import BaseRegressor, LogisticRegressor,loadDataset
 # (you will probably need to import more things here)
 
@@ -31,8 +32,11 @@ features = [
 # Load dataset for testing
 X_train, X_test, y_train, y_test = loadDataset(features, split_percent=0.8)
 
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_val = sc.transform(X_val)
 # Initialize model
-model = LogisticRegressor(num_feats=X_train.shape[1])
+model = LogisticRegressor(num_feats=6, learning_rate=0.01, tol=0.00001, max_iter=5000, batch_size=32)
 
 # Tests
 def test_prediction():

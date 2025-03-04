@@ -1,9 +1,11 @@
+import pytest
 import numpy as np
 import pandas as pd
-from regression import BaseRegressor, LogisticRegressor,loadDataset
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, log_loss
+from sklearn.metrics import log_loss, confusion_matrix, ConfusionMatrixDisplay
+from regression import BaseRegressor, LogisticRegressor, loadDataset
 
 # Load dataset
 features = [
@@ -20,28 +22,41 @@ X_train, X_test, y_train, y_test = loadDataset(features, split_percent=0.8)
 # Initialize model
 model = LogisticRegressor(num_feats=X_train.shape[1])
 
-# Initialize our model
-our_model = LogisticRegressor(num_feats=X_train.shape[1])
-our_model.train_model(X_train, y_train, X_test, y_test)
-y_pred_our = our_model.make_prediction(X_test)
-y_pred_our_binary = (y_pred_our >= 0.5).astype(int)
+# Tests
+def test_prediction():
+    model.train_model(X_train, y_train, X_test, y_test)
+    y_pred = model.make_prediction(X_test)
+    assert np.all(y_pred >= 0) and np.all(y_pred <= 1), "Predictions should be between 0 and 1."
 
-# Initialize sklearn model
-sklearn_model = LogisticRegression()
-sklearn_model.fit(X_train, y_train)
-sklearn_pred = sklearn_model.predict_proba(X_test)[:, 1]
-sklearn_pred_binary = sklearn_model.predict(X_test)
+def test_loss_function():
+    model.train_model(X_train, y_train, X_test, y_test)
+    y_pred = model.make_prediction(X_test)
+    sklearn_loss = log_loss(y_test, y_pred)
+    model_loss = model.loss_function(y_test, y_pred)
+    assert np.isclose(model_loss, sklearn_loss, atol=1e-4), "Loss function does not match sklearn log_loss."
 
-# Compare accuracy and log loss
-our_accuracy = accuracy_score(y_test, y_pred_our_binary)
-sklearn_accuracy = accuracy_score(y_test, sklearn_pred_binary)
-our_log_loss = log_loss(y_test, y_pred_our)
-sklearn_log_loss = log_loss(y_test, sklearn_pred)
+def test_gradient():
+    model.train_model(X_train, y_train, X_test, y_test)
+    X_sample = X_train[:5]
+    y_sample = y_train[:5]
+    grad = model.calculate_gradient(y_sample, X_sample)
+    assert grad.shape == (X_train.shape[1] + 1,), "Gradient shape mismatch."
 
-print(f"Our Model Accuracy: {our_accuracy:.4f}")
-print(f"Sklearn Model Accuracy: {sklearn_accuracy:.4f}")
-print(f"Our Model Log Loss: {our_log_loss:.4f}")
-print(f"Sklearn Model Log Loss: {sklearn_log_loss:.4f}")
+def test_training():
+    initial_weights = model.W.copy()
+    model.train_model(X_train, y_train, X_test, y_test)
+    updated_weights = model.W.copy()
+    assert not np.array_equal(initial_weights, updated_weights), "Weights should update during training."
 
-assert np.allclose(our_log_loss, sklearn_log_loss, atol=0.1), "Log loss mismatch with sklearn!"
-assert np.abs(our_accuracy - sklearn_accuracy) < 0.1, "Accuracy mismatch with sklearn!"
+def print_confusion_matrix():
+    model.train_model(X_train, y_train, X_test, y_test)
+    y_pred = model.make_prediction(X_test)
+    y_pred_binary = (y_pred >= 0.5).astype(int)
+    cm = confusion_matrix(y_test, y_pred_binary)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+    disp.plot()
+    plt.title("Confusion Matrix")
+    plt.show()
+
+if __name__ == "__main__":
+    print_confusion_matrix()
